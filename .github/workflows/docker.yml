@@ -56,7 +56,7 @@ jobs:
         with:
           image: invidious
           tags: ${{ matrix.containerdistro }}-${{ matrix.arch-tag }}
-          containerfitemporarily disable container signingles: Dockerfile.${{ matrix.containerdistro }}
+          containerfiles: Dockerfile.${{ matrix.containerdistro }}
           platforms: ${{ matrix.arches }}
           context: invidious
 
