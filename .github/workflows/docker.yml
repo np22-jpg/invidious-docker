@@ -36,6 +36,11 @@ jobs:
         with:
             submodules: recursive
 
+      - name: Install qemu
+        run: |
+          apt-get update
+          apt-get install qemu qemu-system-arm qemu-system-ppc 
+
       # BUILD
 
       - name: Get patches
