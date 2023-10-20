@@ -1,0 +1,90 @@
+name: Build and Test Docker Images
+
+on:
+  push:
+    branches: [ "main" ]
+  schedule:
+    - cron: '20 03 * * *'  # 3:20am everyday
+
+jobs:
+  build_and_push_docker_images:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        containerdistro: [ alpine, debian ]
+        arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+        include:
+          - arches: linux/amd64
+            arch-tag: amd64
+          - arches: linux/arm64
+            arch-tag: arm64
+          - arches: linux/arm/v7
+            arch-tag: armv7
+          - arches: linux/ppc64le
+            arch-tag: ppc64le
+
+    permissions:
+      contents: read
+      packages: write
+
+    name: Docker Images
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+        with:
+            submodules: recursive
+
+      # BUILD
+
+      - name: Get patches
+        run: |
+          chmod +x get-patches.sh
+          chmod +x apply-patches.sh
+          ./get-patches.sh
+          ./apply-patches.sh
+
+      - name: Build Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: invidious
+          tags: ${{ matrix.containerdistro }}-${{ matrix.arch-tag }}
+          containerfiles: Dockerfile.${{ matrix.containerdistro }}
+          platforms: ${{ matrix.arches }}
+          context: invidious
+
+      # PUSH
+
+      - uses: sigstore/cosign-installer@v3.1.1 
+      - name: Write Cosign Key
+        run:  |
+          echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
+          wc -c cosign.key;
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
+
+      - name: Push To GHCR
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
+
+      - name: Sign GHCR Image
+        run:  |
+          cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
+          cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+
+
+      - name: Print image URLs
+        run:  |
+          echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"

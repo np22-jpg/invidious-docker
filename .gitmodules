@@ -1,0 +1,6 @@
+[submodule "invidious"]
+	path = invidious
+	url = https://github.com/iv-org/invidious.git
+[submodule "invidious-custom"]
+	path = invidious-custom
+	url = https://github.com/yewtudotbe/invidious-custom.git

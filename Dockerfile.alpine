@@ -1,0 +1,46 @@
+FROM docker.io/crystallang/crystal:1.8.2-alpine AS builder
+RUN apk add --no-cache sqlite-static yaml-static
+
+WORKDIR /invidious
+COPY shard.yml shard.lock ./
+RUN shards install --production
+
+COPY . .
+
+ARG release=1
+
+# RUN crystal spec --release \
+#     --warnings all \
+#     --link-flags "-lxml2 -llzma"    
+RUN if [[ "${release}" == 1 ]] ; then \
+        crystal build ./src/invidious.cr \
+        --release \
+        --static --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    else \
+        crystal build ./src/invidious.cr \
+        --static --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    fi
+
+FROM docker.io/library/alpine:3.18 AS release
+RUN apk add --no-cache librsvg ttf-opensans 
+WORKDIR /app
+RUN addgroup -g 1000 -S invidious && \
+    adduser -u 1000 -S invidious -G invidious
+
+# Copy config
+COPY --chown=invidious config/config.example.yml config/config.yml
+RUN sed -i 's/host: \(127.0.0.1\|localhost\)/host: invidious-db/' config/config.yml
+
+# Get invidious
+COPY --from=builder /invidious/invidious ./
+COPY --from=builder /invidious/assets assets
+COPY --from=builder /invidious/locales locales
+COPY --from=builder /invidious/config/sql config/sql
+RUN chmod o+rX -R ./assets ./config ./locales
+
+EXPOSE 3000
+USER invidious
+
+CMD [ "/app/invidious" ]

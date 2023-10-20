@@ -1,0 +1,42 @@
+FROM docker.io/library/debian:12 AS builder
+RUN apt-get update
+RUN apt-get install curl git liblzma-dev libsqlite3-dev -y 
+RUN curl -fsSL https://crystal-lang.org/install.sh | bash -s -- --channel stable
+
+WORKDIR /invidious
+COPY shard.yml shard.lock ./
+RUN shards install 
+
+COPY . .
+
+# RUN crystal spec --release \
+#     --warnings all \
+#     --link-flags "-lxml2 -llzma"    
+RUN crystal build ./src/invidious.cr \
+        --warnings all \
+        --link-flags "-lxml2 -llzma"
+
+
+FROM docker.io/library/debian:12 AS release
+RUN apt-get update && \
+    apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 -y
+
+WORKDIR /app
+RUN groupadd invidious && \
+    useradd invidious -u 1000 -g invidious
+
+# Copy config
+COPY --chown=invidious config/config.example.yml config/config.yml
+RUN sed -i 's/host: \(127.0.0.1\|localhost\)/host: invidious-db/' config/config.yml
+
+# Get invidious
+COPY --from=builder /invidious/invidious ./
+COPY --from=builder /invidious/assets assets
+COPY --from=builder /invidious/locales locales
+COPY --from=builder /invidious/config/sql config/sql
+RUN chmod o+rX -R ./assets ./config ./locales
+
+EXPOSE 3000
+USER invidious
+
+CMD [ "/app/invidious" ]

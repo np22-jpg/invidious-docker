@@ -1,0 +1,5 @@
+# This is generated on the fly
+patches
+
+# Do not bring in cosign private key
+cosign.key
