@@ -62,14 +62,14 @@ jobs:
 
       # PUSH
 
-      - uses: sigstore/cosign-installer@v3.1.1 
-      - name: Write Cosign Key
-        run:  |
-          echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
-          wc -c cosign.key;
-        env:
-          COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
+      # - uses: sigstore/cosign-installer@v3.1.1 
+      # - name: Write Cosign Key
+      #   run:  |
+      #     echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
+      #     wc -c cosign.key;
+      #   env:
+      #     COSIGN_EXPERIMENTAL: false
+      #     COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
 
       - name: Push To GHCR
         id: push-to-ghcr
@@ -81,13 +81,13 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
 
-      - name: Sign GHCR Image
-        run:  |
-          cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
-          cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
-        env:
-          COSIGN_EXPERIMENTAL: false
-          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+      # - name: Sign GHCR Image
+      #   run:  |
+      #     cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
+      #     cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+      #   env:
+      #     COSIGN_EXPERIMENTAL: false
+      #     GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
 
 
       - name: Print image URLs
