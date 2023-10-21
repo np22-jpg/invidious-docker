@@ -1,0 +1,24 @@
+{
+  "platformAutomerge": true,
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": [
+        "docker"
+      ]
+    }
+  ],
+  "git-submodules": {
+    "enabled": true,
+    "versioning": "git",
+    "fileMatch": [
+      "(^|/)\\.gitmodules$"
+    ],
+    "automerge": true
+  },
+  "includeForks": true
+}

@@ -39,7 +39,7 @@ jobs:
       - name: Install qemu
         run: |
           sudo apt-get update
-          sudo apt-get install qemu qemu-system-arm qemu-system-ppc 
+          sudo apt-get install qemu qemu-system-arm qemu-system-ppc qemu-user-static -y
 
       # BUILD
 
