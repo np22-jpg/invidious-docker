@@ -128,7 +128,10 @@ jobs:
 
           alias_tags=("${BUILD_TAGS[@]}")
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
-          echo "super_specific_tag=${alias_tags[-1]}" >> $GITHUB_OUTPUT
+
+          super_specific_tags=${alias_tags[-1]}
+          echo -n "$super_specific_tags" > super_specific_tag
+          echo "$super_specific_tag" >> $GITHUB_OUTPUT
 
       - name: Install qemu
         run: |
