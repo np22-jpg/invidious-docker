@@ -46,17 +46,15 @@ jobs:
 
     name: Docker Images
     steps:
+
+      # SETUP
+
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
             submodules: recursive
 
-      - name: Install qemu
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu qemu-system-arm qemu-system-ppc qemu-user-static -y
-
-      # BUILD
+      # PREPARE
 
       - name: Get patches
         run: |
@@ -65,15 +63,88 @@ jobs:
           ./scripts/apply-patches.sh ${{ matrix.patchsets }}
           ./scripts/fix-git-compile.sh
 
+      - name: Generate tags
+        id: generate-tags
+        shell: bash
+        run: |
+          # Generate a timestamp for creating an image version history
+          TIMESTAMP="$(date +%Y%m%d)"
+          VARIANT="${{ matrix.containerdistro }}"
+
+          COMMIT_TAGS=()
+          BUILD_TAGS=()
+
+          if [[ "${{ matrix.containerdistro }}" == "alpine" ]]; then
+            if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
+              BUILD_TAGS+=("latest")
+              BUILD_TAGS+=("latest-${{ matrix.arch-tag }}")
+              BUILD_TAGS+=("alpine")
+              BUILD_TAGS+=("alpine-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
+              BUILD_TAGS+=("latest-highload")
+              BUILD_TAGS+=("latest-highload-${{ matrix.arch-tag }}")
+              BUILD_TAGS+=("alpine-highload")
+              BUILD_TAGS+=("alpine-highload-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
+              BUILD_TAGS+=("latest-redis")
+              BUILD_TAGS+=("latest-redis-${{ matrix.arch-tag }}")
+              BUILD_TAGS+=("alpine-redis")
+              BUILD_TAGS+=("alpine-redis-${{ matrix.arch-tag }}")
+            fi 
+          elif [[ "${{ matrix.containerdistro }}" == "debian" ]]; then
+            if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
+              BUILD_TAGS+=("debian")
+              BUILD_TAGS+=("debian-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
+              BUILD_TAGS+=("debian-highload")
+              BUILD_TAGS+=("debian-highload-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
+              BUILD_TAGS+=("debian-redis")
+              BUILD_TAGS+=("debian-redis-${{ matrix.arch-tag }}")
+            fi
+          elif [[ "${{ matrix.containerdistro }}" == "centos" ]]; then
+            if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
+              BUILD_TAGS+=("centos")
+              BUILD_TAGS+=("centos-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
+              BUILD_TAGS+=("centos-highload")
+              BUILD_TAGS+=("centos-highload-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
+              BUILD_TAGS+=("centos-redis")
+              BUILD_TAGS+=("centos-redis-${{ matrix.arch-tag }}")
+            fi
+          fi
+          
+
+          # Append matching timestamp tags to keep a version history
+          for TAG in "${BUILD_TAGS[@]}"; do
+              BUILD_TAGS+=("${TAG}-${TIMESTAMP}")
+          done
+
+          echo "Generated the following build tags: "
+          for TAG in "${BUILD_TAGS[@]}"; do
+              echo "${TAG}"
+          done
+
+          echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
+
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu-user-static -y
+
+      # BUILD
+
       - name: Build Image
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
           image: invidious
-          tags: ${{ matrix.containerdistro }}-${{ matrix.arch-tag }}-${{ matrix.patchsets }}
+          tags: ${{ steps.generate-tags.outputs.alias_tags }}
           containerfiles: Dockerfile.${{ matrix.containerdistro }}
           platforms: ${{ matrix.arches }}
           context: invidious
+
 
       # PUSH
 
@@ -105,11 +176,9 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}'
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ matrix.containerdistro }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
-        env:
-          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
