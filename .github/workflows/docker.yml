@@ -76,7 +76,9 @@ jobs:
 
           if [[ "${{ matrix.containerdistro }}" == "alpine" ]]; then
             if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
-              BUILD_TAGS+=("latest")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("latest")
+              fi
               BUILD_TAGS+=("latest-${{ matrix.arch-tag }}")
               BUILD_TAGS+=("alpine")
               BUILD_TAGS+=("alpine-${{ matrix.arch-tag }}")
@@ -136,7 +138,7 @@ jobs:
 
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: qemu-user-static
+          packages: qemu-user-static qemu qemu-system-arm qemu-system-ppc
           version: 1.0
 
       - name: Cache Shards
