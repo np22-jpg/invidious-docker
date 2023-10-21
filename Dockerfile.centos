@@ -26,7 +26,9 @@ RUN if [[ "${release}" == 1 ]] ; then \
     fi
 
 FROM docker.io/library/almalinux:8 AS release
-RUN dnf install libxml2 librsvg2 libyaml sqlite openssl libevent -y
+RUN dnf install epel-release -y && \
+    dnf install libxml2 librsvg2 libyaml sqlite openssl libevent tini -y && \
+    dnf clean all
 
 WORKDIR /invidious
 RUN groupadd invidious && \
@@ -46,4 +48,5 @@ RUN chmod o+rX -R ./assets ./config ./locales
 EXPOSE 3000
 USER invidious
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD [ "/invidious/invidious" ]

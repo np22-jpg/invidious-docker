@@ -3,3 +3,7 @@ patches
 
 # Do not bring in cosign private key
 cosign.key
+
+# Testing logs
+wget-log*
+*.log

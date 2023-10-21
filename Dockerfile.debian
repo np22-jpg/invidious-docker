@@ -27,7 +27,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
 
 FROM docker.io/library/debian:12 AS release
 RUN apt-get update && \
-    apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 -y
+    apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 tini -y
 
 WORKDIR /invidious
 RUN groupadd invidious && \
@@ -47,4 +47,5 @@ RUN chmod o+rX -R ./assets ./config ./locales
 EXPOSE 3000
 USER invidious
 
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD [ "/invidious/invidious" ]
