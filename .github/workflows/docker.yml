@@ -15,6 +15,7 @@ jobs:
       matrix:
         containerdistro: [ alpine, debian, centos ]
         arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+        patchsets: [ vanilla, highload, redis ]
         exclude:
           - containerdistro: debian
             arches: linux/arm64
@@ -69,7 +70,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: invidious
-          tags: ${{ matrix.containerdistro }}-${{ matrix.arch-tag }}
+          tags: ${{ matrix.containerdistro }}-${{ matrix.arch-tag }}-${{ matrix.patchsets }}
           containerfiles: Dockerfile.${{ matrix.containerdistro }}
           platforms: ${{ matrix.arches }}
           context: invidious
