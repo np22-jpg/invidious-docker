@@ -13,11 +13,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containerdistro: [ alpine, debian ]
+        containerdistro: [ alpine, debian, centos ]
         arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
         exclude:
           - containerdistro: debian
-            arches: [ linux/arm64, linux/arm/v7, linux/ppc64le ]
+            arches: linux/arm64
+          - containerdistro: debian
+            arches: linux/arm/v7
+          - containerdistro: debian
+            arches: linux/ppc64le
+          - containerdistro: centos
+            arches: linux/arm64
+          - containerdistro: centos
+            arches: linux/arm/v7
+          - containerdistro: centos
+            arches: linux/ppc64le
         include:
           - arches: linux/amd64
             arch-tag: amd64

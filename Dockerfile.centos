@@ -1,6 +1,7 @@
-FROM docker.io/library/debian:12 AS builder
-RUN apt-get update
-RUN apt-get install curl git liblzma-dev libsqlite3-dev -y 
+FROM docker.io/library/almalinux:8 AS builder
+RUN dnf install dnf-plugins-core -y && \
+    dnf config-manager --set-enabled powertools && \
+    dnf install git-core xz-devel sqlite-libs libxml2-devel libyaml-devel sqlite-devel openssl-devel -y 
 RUN curl -fsSL https://crystal-lang.org/install.sh | bash -s -- --version=1.8
 
 WORKDIR /invidious
@@ -17,9 +18,8 @@ RUN crystal build ./src/invidious.cr \
         --link-flags "-lxml2 -llzma"
 
 
-FROM docker.io/library/debian:12 AS release
-RUN apt-get update && \
-    apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 -y
+FROM docker.io/library/almalinux:8 AS release
+RUN dnf install libxml2 librsvg2 libyaml sqlite openssl libevent -y
 
 WORKDIR /app
 RUN groupadd invidious && \
