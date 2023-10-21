@@ -138,7 +138,7 @@ jobs:
 
       - uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          packages: qemu-user-static qemu qemu-system-arm qemu-system-ppc podman
+          packages: qemu-user-static qemu qemu-system-arm qemu-system-ppc podman containernetworking-plugins
           version: 1.0
 
       - name: Cache Shards
