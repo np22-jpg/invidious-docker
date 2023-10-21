@@ -152,10 +152,10 @@ jobs:
         run: |
           echo "super_specific_tag=$(echo ${{ steps.generate-tags.outputs.alias_tags }} | awk '{print $NF}')" >> $GITHUB_OUTPUT
 
-      - uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: qemu-user-static qemu qemu-system-arm qemu-system-ppc podman containernetworking-plugins
-          version: 1.0
+      - name: Install packages for testing
+        run: |
+          apt-get update
+          apt-get install -y qemu-user-static podman
 
       - name: Cache Shards
         uses: actions/cache@v3
