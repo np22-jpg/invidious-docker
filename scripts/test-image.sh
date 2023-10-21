@@ -9,11 +9,12 @@ stop_containers() {
     podman stop invidious invidious-db invidious-redis
 }
 
+# For some reason this is super broken on Ubuntu
 # create a network for the containers to communicate if it doesnt exist
-if ! podman network inspect invidious >/dev/null 2>&1; then
-    echo "Creating network..."
-    podman network create invidious
-fi
+# if ! podman network inspect invidious >/dev/null 2>&1; then
+#     echo "Creating network..."
+#     podman network create invidious
+# fi
 
 # Postgres
 if ! podman container exists invidious-db; then
@@ -25,8 +26,7 @@ if ! podman container exists invidious-db; then
         --env POSTGRES_DB=invidious \
         --env POSTGRES_USER=kemal \
         --env POSTGRES_PASSWORD=kemal \
-        --expose=5432 \
-        --network=invidious \
+        --network host \
         docker.io/library/postgres:latest >db.log 2>&1  &
     echo "Waiting for postgres to configure..."
     sleep 20
@@ -37,22 +37,25 @@ if ! podman container exists invidious-redis; then
     echo "Running redis container..."
     podman run --rm \
         --name invidious-redis \
-        --expose=6379 \
-        --network=invidious \
+        --network host \
         docker.io/library/redis:latest >redis.log 2>&1 &
 fi
 
 # Invidious
 echo "Starting invidious container..."
 podman run --rm \
-    -p 3000:3000 \
-    --network invidious \
+    --network host \
     --name invidious \
     -v .github/config.yml:/invidious/config/config.yml \
     "$image" 2>&1 | tee invidious.log &
 
 echo "Waiting for invidious to start..."
 sleep 5
+if ! podman container exists invidious; then
+    echo "Invidious failed to start!"
+    podman stop invidious-db invidious-redis
+    exit 1
+fi
 
 # Run tests
 echo "Running tests..."
