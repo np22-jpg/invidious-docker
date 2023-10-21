@@ -10,9 +10,9 @@ RUN shards install
 
 COPY . .
 
-# RUN crystal spec --release \
-#     --warnings all \
-#     --link-flags "-lxml2 -llzma"    
+RUN crystal spec --release \
+    --warnings all \
+    --link-flags "-lxml2 -llzma"    
 RUN crystal build ./src/invidious.cr \
         --warnings all \
         --link-flags "-lxml2 -llzma"

@@ -134,10 +134,16 @@ jobs:
         run: |
           echo "super_specific_tag=$(echo ${{ steps.generate-tags.outputs.alias_tags }} | awk '{print $NF}')" >> $GITHUB_OUTPUT
 
-      - name: Install qemu
-        run: |
-          sudo apt-get update
-          sudo apt-get install qemu-user-static -y
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: qemu-user-static
+          version: 1.0
+
+      - name: Cache Shards
+        uses: actions/cache@v3
+        with:
+          path: ./lib
+          key: shards-${{ hashFiles('shard.lock') }}
 
       # BUILD
 
@@ -150,6 +156,10 @@ jobs:
           containerfiles: Dockerfile.${{ matrix.containerdistro }}
           platforms: ${{ matrix.arches }}
           context: invidious
+          extra-args: |
+            volume=
+            cache-to=ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}
+            cache-from=ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}
 
 
       # PUSH
