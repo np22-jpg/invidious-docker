@@ -5,23 +5,31 @@ RUN curl -fsSL https://crystal-lang.org/install.sh | bash -s -- --version=1.8
 
 WORKDIR /invidious
 COPY shard.yml shard.lock ./
-RUN shards install 
+RUN shards install
 
 COPY . .
 
-# RUN crystal spec --release \
-#     --warnings all \
-#     --link-flags "-lxml2 -llzma"    
-RUN crystal build ./src/invidious.cr \
-        --warnings all \
-        --link-flags "-lxml2 -llzma"
+ARG release=1
+RUN crystal spec --release \
+    --warnings all \
+    --link-flags "-lxml2 -llzma"   
+RUN if [[ "${release}" == 1 ]] ; then \
+        crystal build ./src/invidious.cr \
+        --release \
+        --static --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    else \
+        crystal build ./src/invidious.cr \
+        --static --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    fi
 
 
 FROM docker.io/library/debian:12 AS release
 RUN apt-get update && \
     apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 -y
 
-WORKDIR /app
+WORKDIR /invidious
 RUN groupadd invidious && \
     useradd invidious -u 1000 -g invidious
 
@@ -39,4 +47,4 @@ RUN chmod o+rX -R ./assets ./config ./locales
 EXPOSE 3000
 USER invidious
 
-CMD [ "/app/invidious" ]
+CMD [ "/invidious/invidious" ]

@@ -3,15 +3,14 @@ RUN apk add --no-cache sqlite-static yaml-static
 
 WORKDIR /invidious
 COPY shard.yml shard.lock ./
-RUN shards install --production
+RUN shards install
 
 COPY . .
 
 ARG release=1
-
-# RUN crystal spec --release \
-#     --warnings all \
-#     --link-flags "-lxml2 -llzma"    
+RUN crystal spec --release \
+    --warnings all \
+    --link-flags "-lxml2 -llzma"   
 RUN if [[ "${release}" == 1 ]] ; then \
         crystal build ./src/invidious.cr \
         --release \
@@ -25,7 +24,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
 
 FROM docker.io/library/alpine:3.18.4 AS release
 RUN apk add --no-cache librsvg ttf-opensans 
-WORKDIR /app
+WORKDIR /invidious
 RUN addgroup -g 1000 -S invidious && \
     adduser -u 1000 -S invidious -G invidious
 
@@ -43,4 +42,4 @@ RUN chmod o+rX -R ./assets ./config ./locales
 EXPOSE 3000
 USER invidious
 
-CMD [ "/app/invidious" ]
+CMD [ "/invidious/invidious" ]
