@@ -28,8 +28,6 @@ if ! podman container exists invidious-db; then
         --env POSTGRES_PASSWORD=kemal \
         --network host \
         docker.io/library/postgres:latest >db.log 2>&1  &
-    echo "Waiting for postgres to configure..."
-    sleep 20
 fi
 
 # Redis
@@ -40,6 +38,10 @@ if ! podman container exists invidious-redis; then
         --network host \
         docker.io/library/redis:latest >redis.log 2>&1 &
 fi
+
+# Wait for DBs
+echo "Waiting for DBs to start..."
+sleep 30
 
 # Invidious
 echo "Starting invidious container..."
