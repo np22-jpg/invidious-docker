@@ -15,6 +15,9 @@ jobs:
       matrix:
         containerdistro: [ alpine, debian ]
         arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+        exclude:
+          - containerdistro: debian
+            arches: [ linux/arm64, linux/arm/v7, linux/ppc64le ]
         include:
           - arches: linux/amd64
             arch-tag: amd64
