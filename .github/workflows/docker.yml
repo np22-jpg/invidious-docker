@@ -42,7 +42,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-      
+
     name: Docker Images
     steps:
       - name: Check out the repo
@@ -104,9 +104,9 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
-          format: sarif
-          output: trivy-results.sarif
+          image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
         env:
           GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
 
