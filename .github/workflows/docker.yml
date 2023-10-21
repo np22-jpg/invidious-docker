@@ -62,7 +62,7 @@ jobs:
         run: |
           chmod u+x scripts/*
           ./scripts/get-patches.sh
-          ./scripts/apply-patches.sh
+          ./scripts/apply-patches.sh ${{ matrix.patchsets }}
           ./scripts/fix-git-compile.sh
 
       - name: Build Image
