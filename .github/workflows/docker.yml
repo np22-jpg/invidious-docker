@@ -83,36 +83,52 @@ jobs:
               BUILD_TAGS+=("alpine")
               BUILD_TAGS+=("alpine-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
-              BUILD_TAGS+=("latest-highload")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("latest-highload")
+              fi
               BUILD_TAGS+=("latest-highload-${{ matrix.arch-tag }}")
               BUILD_TAGS+=("alpine-highload")
               BUILD_TAGS+=("alpine-highload-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
-              BUILD_TAGS+=("latest-redis")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("latest-redis")
+              fi
               BUILD_TAGS+=("latest-redis-${{ matrix.arch-tag }}")
               BUILD_TAGS+=("alpine-redis")
               BUILD_TAGS+=("alpine-redis-${{ matrix.arch-tag }}")
             fi 
           elif [[ "${{ matrix.containerdistro }}" == "debian" ]]; then
             if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
-              BUILD_TAGS+=("debian")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("debian")
+              fi
               BUILD_TAGS+=("debian-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
-              BUILD_TAGS+=("debian-highload")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("debian-highload")
+              fi
               BUILD_TAGS+=("debian-highload-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
-              BUILD_TAGS+=("debian-redis")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("debian-redis")
+              fi
               BUILD_TAGS+=("debian-redis-${{ matrix.arch-tag }}")
             fi
           elif [[ "${{ matrix.containerdistro }}" == "centos" ]]; then
             if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
-              BUILD_TAGS+=("centos")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("centos")
+              fi
               BUILD_TAGS+=("centos-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
-              BUILD_TAGS+=("centos-highload")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("centos-highload")
+              fi
               BUILD_TAGS+=("centos-highload-${{ matrix.arch-tag }}")
             elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
-              BUILD_TAGS+=("centos-redis")
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("centos-redis")
+              fi
               BUILD_TAGS+=("centos-redis-${{ matrix.arch-tag }}")
             fi
           fi
@@ -167,6 +183,7 @@ jobs:
 
       # TEST
       - name: Test image
+        if: matrix.arch-tag == 'amd64'
         run: ./scripts/test-image.sh ${{ steps.build-image.outputs.image }}
 
       # PUSH
