@@ -1,0 +1,47 @@
+FROM docker.io/crystallang/crystal:1.8.2-alpine AS builder
+RUN apk add --no-cache sqlite-static yaml-static
+
+WORKDIR /invidious
+COPY shard.yml shard.lock ./
+RUN shards install
+
+COPY . .
+
+ARG release=1
+RUN crystal spec --release \
+    --warnings all \
+    --link-flags "-lxml2 -llzma"   
+RUN if [ "$release" == 1 ] ; then \
+        crystal build ./src/invidious.cr \
+        --static \
+        --release \
+        --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    else \
+        crystal build ./src/invidious.cr \
+        --static \
+        --warnings all \
+        --link-flags "-lxml2 -llzma"; \
+    fi
+
+FROM gcr.io/distroless/static-debian12 AS release
+# RUN apk add --no-cache librsvg ttf-opensans tini
+WORKDIR /invidious
+# RUN addgroup -g 1000 -S invidious && \
+#     adduser -u 1000 -S invidious -G invidious
+
+# Copy config
+COPY --chown=1000 config/config.example.yml config/config.yml
+
+# Get invidious
+COPY --from=builder /invidious/invidious ./
+COPY --from=builder /invidious/assets assets
+COPY --from=builder /invidious/locales locales
+COPY --from=builder /invidious/config/sql config/sql
+# RUN chmod o+rX -R ./assets ./config ./locales
+
+EXPOSE 3000
+USER 1000
+
+# ENTRYPOINT ["/sbin/tini", "--"]
+CMD [ "/invidious/invidious" ]

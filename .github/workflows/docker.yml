@@ -13,23 +13,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        containerdistro: [ alpine, debian, centos ]
-        arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+        containerdistro: [ alpine, static, debian, ubuntu, centos ]
+        arches: [ linux/amd64 ]
         patchsets: [ vanilla, highload, redis ]
-        exclude:
-          - containerdistro: debian
-            arches: linux/arm64
-          - containerdistro: debian
-            arches: linux/arm/v7
-          - containerdistro: debian
-            arches: linux/ppc64le
-          - containerdistro: centos
-            arches: linux/arm64
-          - containerdistro: centos
-            arches: linux/arm/v7
-          - containerdistro: centos
-            arches: linux/ppc64le
         include:
+          - containerdistro: alpine
+            arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+          - containerdistro: static
+            arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
           - arches: linux/amd64
             arch-tag: amd64
           - arches: linux/arm64
@@ -97,6 +88,23 @@ jobs:
               BUILD_TAGS+=("alpine-redis")
               BUILD_TAGS+=("alpine-redis-${{ matrix.arch-tag }}")
             fi 
+          elif [[ "${{ matrix.containerdistro }}" == "min" ]]; then
+            if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("min")
+              fi
+              BUILD_TAGS+=("min-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("min-highload")
+              fi
+              BUILD_TAGS+=("min-highload-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("min-redis")
+              fi
+              BUILD_TAGS+=("min-redis-${{ matrix.arch-tag }}")
+            fi
           elif [[ "${{ matrix.containerdistro }}" == "debian" ]]; then
             if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
               if [[ "${{ matrix.arches }}" == amd64 ]]; then
@@ -113,6 +121,23 @@ jobs:
                 BUILD_TAGS+=("debian-redis")
               fi
               BUILD_TAGS+=("debian-redis-${{ matrix.arch-tag }}")
+            fi
+          elif [[ "${{ matrix.containerdistro }}" == "ubuntu" ]]; then
+            if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("ubuntu")
+              fi
+              BUILD_TAGS+=("ubuntu-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "highload" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("ubuntu-highload")
+              fi
+              BUILD_TAGS+=("ubuntu-highload-${{ matrix.arch-tag }}")
+            elif [[ "${{ matrix.patchsets }}" == "redis" ]]; then
+              if [[ "${{ matrix.arches }}" == amd64 ]]; then
+                BUILD_TAGS+=("ubuntu-redis")
+              fi
+              BUILD_TAGS+=("ubuntu-redis-${{ matrix.arch-tag }}")
             fi
           elif [[ "${{ matrix.containerdistro }}" == "centos" ]]; then
             if [[ "${{ matrix.patchsets }}" == "vanilla" ]]; then
@@ -147,10 +172,10 @@ jobs:
           alias_tags=("${BUILD_TAGS[@]}")
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
 
-      - name: Get the last (and most specific) tag
-        id: specific-tag
-        run: |
-          echo "super_specific_tag=$(echo ${{ steps.generate-tags.outputs.alias_tags }} | awk '{print $NF}')" >> $GITHUB_OUTPUT
+      # - name: Get the last (and most specific) tag
+      #   id: specific-tag
+      #   run: |
+      #     echo "super_specific_tag=$(echo ${{ steps.generate-tags.outputs.alias_tags }} | awk '{print $NF}')" >> $GITHUB_OUTPUT
 
       - name: Install packages for testing
         run: |
@@ -205,10 +230,9 @@ jobs:
       - name: Sign GHCR Image
         run:  |
           cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ steps.push-to-ghcr.outputs.digest }}
         env:
           COSIGN_EXPERIMENTAL: false
-          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
 
       # SCAN
@@ -216,7 +240,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}:${{ steps.specific-tag.outputs.super_specific_tag }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ steps.push-to-ghcr.outputs.digest }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
