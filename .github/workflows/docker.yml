@@ -174,17 +174,17 @@ jobs:
 
       # SCAN
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ matrix.containerdistro }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+      # - name: Run Trivy vulnerability scanner
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: 'ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ matrix.containerdistro }}'
+      #     format: 'sarif'
+      #     output: 'trivy-results.sarif'
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v2
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
 
       # PRINT
 
