@@ -155,9 +155,10 @@ jobs:
           tags: ${{ steps.generate-tags.outputs.alias_tags }}
           containerfiles: Dockerfile.${{ matrix.containerdistro }}
           platforms: ${{ matrix.arches }}
-          extra-args: volume=./lib:/invidious/lib
-            cache-to=ghcr.io/${{ github.repository_owner }}/invidious
-            cache-from=ghcr.io/${{ github.repository_owner }}/invidious
+          extra-args: |
+            --volume=./lib:/invidious/lib
+            --cache-to=ghcr.io/${{ github.repository_owner }}/invidious
+            --cache-from=ghcr.io/${{ github.repository_owner }}/invidious
           context: invidious
 
 
