@@ -129,9 +129,10 @@ jobs:
           alias_tags=("${BUILD_TAGS[@]}")
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
 
-          super_specific_tags=${alias_tags[-1]}
-          echo -n "$super_specific_tags" > super_specific_tag
-          echo "$super_specific_tag" >> $GITHUB_OUTPUT
+      - name: Get the last (and most specific) tag
+        id: specific-tag
+        run: |
+          echo "super_specific_tag=$(echo ${{ steps.generate-tags.outputs.alias_tags }} | awk '{print $NF}')" >> $GITHUB_OUTPUT
 
       - name: Install qemu
         run: |
@@ -181,7 +182,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}:${{ steps.generate-tags.outputs.super_specific_tag }}
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}:${{ steps.specific-tag.outputs.super_specific_tag }}
           format: 'sarif'
           output: 'trivy-results.sarif'
 
