@@ -140,10 +140,13 @@ jobs:
           version: 1.0
 
       - name: Cache Shards
-        uses: actions/cache@v3
+        uses: pate-s/cache@v3
         with:
           path: ${{ github.workspace }}/shardscache
           key: shards-${{ hashFiles('invidious/shard.lock') }}
+
+      # Ensure shardscache exists
+      - run: mkdir -p ${{ github.workspace }}/shardscache
 
       # BUILD
 
