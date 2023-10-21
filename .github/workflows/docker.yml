@@ -41,7 +41,8 @@ jobs:
     permissions:
       contents: read
       packages: write
-
+      security-events: write
+      
     name: Docker Images
     steps:
       - name: Check out the repo
@@ -58,10 +59,10 @@ jobs:
 
       - name: Get patches
         run: |
-          chmod +x get-patches.sh
-          chmod +x apply-patches.sh
-          ./get-patches.sh
-          ./apply-patches.sh
+          chmod u+x scripts/*
+          ./scripts/get-patches.sh
+          ./scripts/apply-patches.sh
+          ./scripts/fix-git-compile.sh
 
       - name: Build Image
         id: build-image
@@ -75,15 +76,6 @@ jobs:
 
       # PUSH
 
-      # - uses: sigstore/cosign-installer@v3.1.1 
-      # - name: Write Cosign Key
-      #   run:  |
-      #     echo "${{ env.COSIGN_PRIVATE_KEY }}" > cosign.key;
-      #     wc -c cosign.key;
-      #   env:
-      #     COSIGN_EXPERIMENTAL: false
-      #     COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}       
-
       - name: Push To GHCR
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
@@ -94,14 +86,36 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           registry: ghcr.io/${{ github.repository_owner }}
 
-      # - name: Sign GHCR Image
-      #   run:  |
-      #     cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
-      #     cosign sign -y --key cosign.key ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
-      #   env:
-      #     COSIGN_EXPERIMENTAL: false
-      #     GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+      # SIGN
 
+      - uses: sigstore/cosign-installer@v3.1.2
+
+      - name: Sign GHCR Image
+        run:  |
+          cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+      # SCAN
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${GHCR_TAGS}
+          format: sarif
+          output: trivy-results.sarif
+        env:
+          GHCR_TAGS: ${{ steps.push-to-ghcr.outputs.digest }}
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      # PRINT
 
       - name: Print image URLs
         run:  |
