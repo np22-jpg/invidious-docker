@@ -4,5 +4,5 @@ db:
   host: localhost
   port: 5432
   dbname: invidious
-# redis_socket: /var/run/redis/redis.sock
+redis_url: tcp://localhost:6379
 hmac_key: "a6b20b8fb622"
