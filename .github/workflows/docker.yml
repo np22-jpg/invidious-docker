@@ -126,6 +126,7 @@ jobs:
               echo "${TAG}"
           done
 
+          alias_tags=("${BUILD_TAGS[@]}")
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
 
       - name: Install qemu
