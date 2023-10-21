@@ -48,5 +48,5 @@ RUN chmod o+rX -R ./assets ./config ./locales
 EXPOSE 3000
 USER invidious
 
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD [ "/invidious/invidious" ]
