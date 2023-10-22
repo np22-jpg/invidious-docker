@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apk add --no-cache sqlite-static yaml-static
+          apk add --no-cache sqlite-static yaml-static bash
 
       # CHECKOUT
 
