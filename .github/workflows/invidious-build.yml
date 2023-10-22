@@ -20,6 +20,7 @@ jobs:
 
     container:
       image: docker.io/crystallang/crystal:${{ matrix.crystalversions }}-alpine
+      options: --user privileged
 
     permissions:
       packages: write
@@ -37,7 +38,7 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
         with:
-            submodules: recursive
+          submodules: recursive
 
       # PREPARE
 
