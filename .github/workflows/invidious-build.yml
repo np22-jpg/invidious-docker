@@ -50,30 +50,32 @@ jobs:
 
       - name: Install shards
         run: |
-          cd ${{ github.workspace }}/invidious
           shards install
+        working-directory: ./invidious
 
       # CHECK
 
       - name: Unit test
         run: |
-          cd ${{ github.workspace }}/invidious
           crystal spec --release \
           --warnings all \
           --cross-compile --target "${{ matrix.triple }}" \
           --link-flags "-lxml2 -llzma"
+        working-directory: ./invidious
 
       # BUILD
 
       - name: Compile
         run: |
-          cd ${{ github.workspace }}/invidious
           crystal build ./src/invidious.cr \
           --static \
           --release \
           --warnings all \
           --cross-compile --target "${{ matrix.triple }}" \
           --link-flags "-lxml2 -llzma"; 
+          pwd
+          ls -la
+        working-directory: ./invidious
 
       # UPLOAD
 
