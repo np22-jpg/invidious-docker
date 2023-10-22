@@ -18,10 +18,6 @@ jobs:
           - crystalversions: "1.8"
             is_supported: true
 
-    container:
-      image: docker.io/crystallang/crystal:${{ matrix.crystalversions }}-alpine
-      options: --privileged
-
     permissions:
       packages: write
 
@@ -29,9 +25,10 @@ jobs:
 
       # INSTALL CRYSTAL AND DEPENDENCIES
 
+      - uses: crystal-lang/install-crystal@v1
       - name: Install dependencies
         run: |
-          apk add --no-cache sqlite-static yaml-static bash
+          apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev 
 
       # CHECKOUT
 
@@ -84,4 +81,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: invidious-${{ matrix.patchsets }}-${{ matrix.crystalversions }}-${{ matrix.triple }}
-          path: ${{ github.workspace }}/invidious/invidious
+          path: ./invidious-docker/invidious/invidious
