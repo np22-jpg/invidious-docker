@@ -48,7 +48,12 @@ jobs:
           chmod u+x scripts/*
           ./scripts/get-patches.sh
           ./scripts/apply-patches.sh ${{ matrix.patchsets }}
-          ./scripts/fix-git-compile.sh
+
+      - name: Cache Shards
+        uses: actions/cache@v3
+        with:
+          path: ./invidious/lib
+          key: shards-${{ hashFiles('shard.lock') }}
 
       - name: Install shards
         run: |
