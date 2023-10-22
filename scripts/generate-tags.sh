@@ -8,7 +8,7 @@ arch=$3
 
 TIMESTAMP="$(date +%Y%m%d)"
 
-PRE_BUILD_TAGS=()
+PRE_BUILD_TAGS=("${distro}")
 
 # Set arch tags
 if [ "$arch" == "linux/amd64" ]; then
@@ -24,17 +24,15 @@ else
   exit 1
 fi
 
-# If it's an alpine build, create an array with "latest" and "alpine"
-# Otherwise, set PRE_BUILD_TAGS to distro
-if [ "$distro" == "alpine" ]; then
-  PRE_BUILD_TAGS+=("latest")
-fi
-PRE_BUILD_TAGS+=("${distro}")
-
 # Append patchset type to each entry in PRE_BUILD_TAGS
 for TAG in "${PRE_BUILD_TAGS[@]}"; do
   PRE_BUILD_TAGS=("${TAG}-${patchset}")
 done
+
+# Create the scenario for a "latest" build
+if [ "$distro" == "alpine" ]; then
+  PRE_BUILD_TAGS+=("latest")
+fi
 
 if [ "$patchset" == "vanilla" ]; then
   PRE_BUILD_TAGS+=("${TAG}")
