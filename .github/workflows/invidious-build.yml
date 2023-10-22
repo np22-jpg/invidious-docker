@@ -73,15 +73,25 @@ jobs:
       # BUILD
 
       - name: Compile
+        if: matrix.triple == 'x86_64-unknown-linux-musl'
         run: |
           crystal build ./src/invidious.cr \
           --static \
           --release \
           --warnings all \
-          --cross-compile --target "${{ matrix.triple }}" \
           --link-flags "-lxml2 -llzma"; 
-          pwd
-          ls -la
+        working-directory: ./invidious
+
+      - name: Cross-compile
+        if: matrix.triple == 'x86_64-unknown-linux-musl'
+        run: |
+          final_command=$(crystal build ./src/invidious.cr \
+          --static \
+          --release \
+          --warnings all \
+          --cross-compile --target "${{ matrix.triple }}" \
+          --link-flags "-lxml2 -llzma" | tail -1) 
+          $final_command
         working-directory: ./invidious
 
       # UPLOAD
@@ -90,4 +100,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: invidious-${{ matrix.patchsets }}-${{ matrix.crystalversions }}-${{ matrix.triple }}
-          path: ./invidious-docker/invidious/invidious
+          path: ./invidious/invidious
