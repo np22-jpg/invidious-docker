@@ -20,7 +20,7 @@ jobs:
 
     container:
       image: docker.io/crystallang/crystal:${{ matrix.crystalversions }}-alpine
-      options: --user privileged
+      options: --privileged
 
     permissions:
       packages: write
