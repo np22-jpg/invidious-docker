@@ -30,18 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apk add --no-cache \
-          git \
-          shards \
-          sqlite-static \
-          yaml-static \
-          yaml-dev \
-          libxml2-static \ 
-          zlib-static \
-          openssl-libs-static \
-          openssl-dev \
-          musl-dev \
-          xz-static 
+          apk add --no-cache sqlite-static yaml-static
 
       # CHECKOUT
 
