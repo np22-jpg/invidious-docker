@@ -1,6 +1,8 @@
 name: Build and Test Docker Images
 
 on:
+  pull_request:
+    branches: [ "main" ]
   push:
     branches: [ "main" ]
   schedule:
@@ -106,6 +108,7 @@ jobs:
       # PUSH
 
       - name: Push To GHCR
+        if: github.event_name != 'pull_request'
         id: push-to-ghcr
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -118,8 +121,10 @@ jobs:
       # SIGN
 
       - uses: sigstore/cosign-installer@v3.1.2
+        if: github.event_name != 'pull_request'
 
       - name: Sign GHCR Image
+        if: github.event_name != 'pull_request'
         run:  |
           cosign login ghcr.io -u ${{ github.actor }} -p ${{ github.token }}
           cosign sign -y --key env://COSIGN_PRIVATE_KEY ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ steps.push-to-ghcr.outputs.digest }}
@@ -130,6 +135,7 @@ jobs:
       # SCAN
 
       - name: Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/${{ steps.build-image.outputs.image }}@${{ steps.push-to-ghcr.outputs.digest }}
@@ -137,6 +143,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
+        if: github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
@@ -144,5 +151,6 @@ jobs:
       # PRINT
 
       - name: Print image URLs
+        if: github.event_name != 'pull_request'
         run:  |
           echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
