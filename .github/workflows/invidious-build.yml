@@ -23,14 +23,15 @@ jobs:
 
     steps:
 
-      # INSTALL CRYSTAL AND DEPENDENCIES
+      # INSTALL TOOLS AND DEPENDENCIES
 
       - uses: crystal-lang/install-crystal@v1
         with:
           crystal: ${{ matrix.crystalversions }}
+
       - name: Install dependencies
         run: |
-          sudo apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev 
+          sudo apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev clang
 
       # CHECKOUT
 
@@ -56,11 +57,10 @@ jobs:
       # CHECK
 
       - name: Unit test
-        if: ${{ matrix.triple }} == "x86_64-unknown-linux-musl"
+        if: matrix.triple == 'x86_64-unknown-linux-musl'
         run: |
           crystal spec --release \
           --warnings all \
-          --cross-compile --target "${{ matrix.triple }}" \
           --link-flags "-lxml2 -llzma"
         working-directory: ./invidious
 
