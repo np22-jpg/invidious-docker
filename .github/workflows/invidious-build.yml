@@ -50,7 +50,7 @@ jobs:
           ./scripts/apply-patches.sh ${{ matrix.patchsets }}
 
       - name: git workaround
-        run:
+        run: |
           rm ./invidious/.git
           cp .git/modules/invidious/ invidious/.git -r
 
