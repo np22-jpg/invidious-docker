@@ -28,7 +28,7 @@ jobs:
       - uses: crystal-lang/install-crystal@v1
       - name: Install dependencies
         run: |
-          apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev 
+          sudo apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev 
 
       # CHECKOUT
 
