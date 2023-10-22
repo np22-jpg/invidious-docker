@@ -1,5 +1,15 @@
-FROM docker.io/crystallang/crystal:1.8.2-alpine AS builder
-RUN apk add --no-cache sqlite-static yaml-static
+FROM docker.io/library/alpine:3.18.4 AS builder
+RUN apk add --no-cache 'crystal=1.8.2-r0' \
+    shards \
+    sqlite-static \
+    yaml-static \
+    yaml-dev \
+    libxml2-static \ 
+    zlib-static \
+    openssl-libs-static \
+    openssl-dev \
+    musl-dev \
+    xz-static
 
 WORKDIR /invidious
 COPY shard.yml shard.lock ./
