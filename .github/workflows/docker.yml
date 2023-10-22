@@ -14,27 +14,15 @@ jobs:
       fail-fast: false
       matrix:
         containerdistro: [ alpine, min, debian, ubuntu, centos ]
-        arches: [ linux/amd64, linux/arm64, linux/arm/v7, linux/ppc64le ]
+        arches: [ linux/amd64, linux/arm64 ]
         patchsets: [ vanilla, highload, redis ]
         exclude:
           - containerdistro: debian
             arches: linux/arm64
-          - containerdistro: debian
-            arches: linux/arm/v7
-          - containerdistro: debian
-            arches: linux/ppc64le
           - containerdistro: ubuntu
             arches: linux/arm64
-          - containerdistro: ubuntu
-            arches: linux/arm/v7
-          - containerdistro: ubuntu
-            arches: linux/ppc64le
           - containerdistro: centos
             arches: linux/arm64
-          - containerdistro: centos
-            arches: linux/arm/v7
-          - containerdistro: centos
-            arches: linux/ppc64le
 
     permissions:
       contents: read
