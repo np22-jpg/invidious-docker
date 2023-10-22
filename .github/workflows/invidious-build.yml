@@ -26,6 +26,8 @@ jobs:
       # INSTALL CRYSTAL AND DEPENDENCIES
 
       - uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: ${{ matrix.crystalversions }}
       - name: Install dependencies
         run: |
           sudo apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev 
