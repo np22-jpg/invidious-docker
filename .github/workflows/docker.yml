@@ -36,16 +36,6 @@ jobs:
           - containerdistro: centos
             arches: linux/ppc64le
 
-        include:
-          - arches: linux/amd64
-            arch-tag: amd64
-          - arches: linux/arm64
-            arch-tag: arm64
-          - arches: linux/arm/v7
-            arch-tag: armv7
-          - arches: linux/ppc64le
-            arch-tag: ppc64le
-
     permissions:
       contents: read
       packages: write
@@ -74,8 +64,16 @@ jobs:
         id: generate-tags
         shell: bash
         run: |
-          scripts/generate-tags.sh ${{ matrix.containerdistro }} ${{ matrix.patchsets }} ${{ matrix.arches }}
-          alias_tags=("${BUILD_TAGS[@]}")
+          alias_tags=()
+          while IFS= read -r line; do
+            alias_tags+=("$line")
+          done < <(./scripts/generate-tags.sh ${{ matrix.containerdistro }} ${{ matrix.patchsets }} ${{ matrix.arches }})
+
+          echo "Generated tags:"
+          for TAG in "${alias_tags[@]}"; do
+            echo "$TAG"
+          done
+
           echo "alias_tags=${alias_tags[*]}" >> $GITHUB_OUTPUT
 
       # - name: Get the last (and most specific) tag
@@ -114,7 +112,7 @@ jobs:
 
       # TEST
       - name: Test image
-        if: matrix.arch-tag == 'amd64'
+        if: matrix.arches == 'linux/amd64'
         run: ./scripts/test-image.sh ${{ steps.build-image.outputs.image }}
 
       # PUSH
