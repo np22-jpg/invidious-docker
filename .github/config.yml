@@ -6,3 +6,4 @@ db:
   dbname: invidious
 redis_url: tcp://localhost:6379
 hmac_key: "a6b20b8fb622"
+modified_source_code_url: "github.com/np22-jpg/invidious-docker"
