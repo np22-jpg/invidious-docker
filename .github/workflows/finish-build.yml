@@ -1,0 +1,65 @@
+name: Build Initial Invidious Binaries
+
+on: 
+  workflow_call:
+    inputs:
+      patchset:
+        description: 'Patchset to build'
+        required: true
+        type: string
+      crystalversion:
+        description: 'Crystal version to build'
+        required: true
+        type: string
+      targettriple:
+        description: 'Target triple to build'
+        required: true
+        type: string
+      targetplatform:
+        description: 'Target platform to build'
+        required: true
+        type: string
+
+jobs:
+  final_build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+
+    steps:
+      - name: Get Initial Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: initial-invidious-${{ inputs.patchset }}-${{ inputs.crystalversion }}-${{ inputs.targettriple }}
+      
+      - name: Sanity Check
+        run: ls -la
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # - name: Build Invidious Binaries
+      #   run: |
+      #     docker run -i -v $PWD:/workspace -w /workspace --rm docker.io/multiarch/alpine:aarch64-edge \
+      #       /bin/sh -c "echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositories && \
+      #       apk add --update --no-cache --force-overwrite icu-libs sqlite-static yaml-static yaml-dev libxml2-static zlib-static openssl-libs-static openssl-dev musl-dev xz-static gcc pcre2-dev gc-dev libevent-dev && \
+      #       $(tail -n1 buildlog)"
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: ${{ inputs.targetplatform }}
+          outputs: type=local,dest=invidious
+          build-args: |
+            INVIDIOUS=invidious.o
+            BUILDLOG=buildlog
+
+      - name: Upload Final Binary
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+        with:
+          name: invidious-${{ inputs.patchset }}-${{ inputs.crystalversion }}-${{ inputs.targettriple }}
+          path: ./invidious

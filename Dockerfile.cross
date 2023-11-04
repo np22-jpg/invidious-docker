@@ -1,0 +1,25 @@
+FROM docker.io/library/alpine:3.18.4 AS builder
+RUN apk add --no-cache \
+    icu-libs \
+    sqlite-static \
+    yaml-static \
+    yaml-dev \
+    libxml2-static \
+    zlib-static \
+    openssl-libs-static \
+    openssl-dev \
+    musl-dev \
+    xz-static \
+    gcc \
+    pcre2-dev \
+    gc-dev \
+    libevent-dev
+
+WORKDIR /invidious
+
+ARG INVIDIOUS
+COPY ${INVIDIOUS} ./
+ARG BUILDLOG
+COPY ${BUILDLOG} ./
+
+RUN $(tail -n1 buildlog)
