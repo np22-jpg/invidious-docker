@@ -89,18 +89,15 @@ jobs:
       - name: Cross-compile
         if: matrix.triple != 'x86_64-unknown-linux-musl'
         run: |
-          sudo podman run -i -v `pwd`:/workspace -w /workspace --rm crystallang/crystal:${{ matrix.crystalversions }}-alpine \
-          sh -c "apk add --no-cache sqlite-static yaml-static && \
-            final_command=$(crystal build ./src/invidious.cr \
-            --static \
-            --release \
-            --warnings all \
-            --cross-compile --target "${{ matrix.triple }}" \
-            --link-flags "-lxml2 -llzma" | tail -1) 
-          sudo podman run --rm --privileged multiarch/qemu-user-static --reset
+          final_command=$(crystal build ./src/invidious.cr \
+          --static \
+          --release \
+          --warnings all \
+          --cross-compile --target "${{ matrix.triple }}" \
+          --link-flags "-lxml2 -llzma" | tail -1) 
           sudo podman run -i -v `pwd`:/workspace -w /workspace --rm docker.io/multiarch/alpine:aarch64-edge \
             /bin/sh -c "echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositories && \
-            apk add --update --no-cache --force-overwrite icu-libs sqlite-static yaml-static yaml-dev libxml2-static zlib-static openssl-libs-static openssl-dev musl-dev xz-static gcc && \
+            apk add --update --no-cache --force-overwrite icu-libs sqlite-static yaml-static yaml-dev libxml2-static zlib-static openssl-libs-static openssl-dev musl-dev xz-static gcc pcre2-dev gc-dev libevent-dev && \
             $final_command"
         working-directory: ./invidious
 

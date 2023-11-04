@@ -89,12 +89,10 @@ jobs:
           path: |
             ./invidious/buildlog
             ./invidious/invidious.o
-  
-      # CALL
-      - name: Call finish_build.yml
-        uses: np22-jpg/invidious/.github/workflows/finish_build.yml@main
-        with:
-          crystalversion: ${{ matrix.crystalversions }}
-          targettriple: ${{ matrix.triple }}
-          targetplatform: ${{ matrix.platform }}
-          patchset: ${{ matrix.patchsets }}
+  call_final_build:
+    uses: ./.github/workflows/finish-build.yml
+    with:
+      crystalversion: ${{ matrix.crystalversions }}
+      targettriple: ${{ matrix.triple }}
+      targetplatform: ${{ matrix.platform }}
+      patchset: ${{ matrix.patchsets }}
