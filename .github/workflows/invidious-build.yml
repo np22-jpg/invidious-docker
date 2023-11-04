@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crystalversions: [ "1.10", "1.9", "1.8" ]
+        crystalversions: [ "1.9", "1.8" ]
         triple: [ aarch64-unknown-linux-musl, x86_64-unknown-linux-musl ]
         patchsets: [ vanilla, redis ]
         include:
@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt install -y curl git liblzma-dev libsqlite3-dev musl musl-dev clang
+          sudo apt install -y curl git
 
       # CHECKOUT
 
@@ -65,9 +65,11 @@ jobs:
       - name: Unit test
         if: matrix.triple == 'x86_64-unknown-linux-musl'
         run: |
-          crystal spec --release \
-          --warnings all \
-          --link-flags "-lxml2 -llzma"
+          podman run -i -v `pwd`:/workspace -w /workspace --rm crystallang/crystal:${{ matrix.crystalversions }}-alpine \
+            sh -c "apk add --no-cache sqlite-static yaml-static && \
+            crystal spec --release \
+            --warnings all \
+            --link-flags '-lxml2 -llzma'"
         working-directory: ./invidious
 
       # BUILD
@@ -75,11 +77,13 @@ jobs:
       - name: Compile
         if: matrix.triple == 'x86_64-unknown-linux-musl'
         run: |
-          crystal build ./src/invidious.cr \
-          --static \
-          --release \
-          --warnings all \
-          --link-flags "-lxml2 -llzma"; 
+          podman run -i -v `pwd`:/workspace -w /workspace --rm crystallang/crystal:${{ matrix.crystalversions }}-alpine \
+            sh -c "apk add --no-cache sqlite-static yaml-static && \
+            crystal build ./src/invidious.cr \
+            --static \
+            --release \
+            --warnings all \
+            --link-flags '-lxml2 -llzma'"; 
         working-directory: ./invidious
 
       - name: Cross-compile
