@@ -94,7 +94,7 @@ jobs:
           sudo podman run --rm --privileged multiarch/qemu-user-static --reset
           sudo podman run -i -v `pwd`:/workspace -w /workspace --rm docker.io/multiarch/alpine:aarch64-edge \
             /bin/sh -c "echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/community' >>/etc/apk/repositories && \
-            apk add --update --no-cache --force-overwrite shards sqlite-static yaml-static yaml-dev libxml2-static zlib-static openssl-libs-static openssl-dev musl-dev xz-static gcc && \
+            apk add --update --no-cache --force-overwrite icu-libs sqlite-static yaml-static yaml-dev libxml2-static zlib-static openssl-libs-static openssl-dev musl-dev xz-static gcc && \
             $final_command"
         working-directory: ./invidious
 
