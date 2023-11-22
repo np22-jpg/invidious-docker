@@ -33,7 +33,7 @@ RUN if [ "$release" == 1 ] ; then \
     fi
 
 FROM docker.io/library/alpine:3.18.4 AS release
-RUN apk add --no-cache librsvg ttf-opensans tini gc yaml libevent
+RUN apk add --no-cache libsrvg rsvg-convert ttf-opensans tini gc yaml libevent
 WORKDIR /invidious
 RUN addgroup -g 1000 -S invidious && \
     adduser -u 1000 -S invidious -G invidious

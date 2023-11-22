@@ -27,7 +27,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
 
 FROM docker.io/library/almalinux:8 AS release
 RUN dnf install epel-release -y && \
-    dnf install libxml2 librsvg2 libyaml sqlite openssl libevent tini -y && \
+    dnf install libxml2 librsvg2 librsvg2-tools libyaml sqlite openssl libevent tini -y && \
     dnf clean all
 
 WORKDIR /invidious
