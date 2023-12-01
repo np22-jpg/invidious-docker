@@ -1,4 +1,4 @@
-FROM docker.io/library/alpine:3.18.4 AS builder
+FROM docker.io/library/alpine:3.18.5 AS builder
 RUN apk add --no-cache \
     icu-libs \
     sqlite-static \

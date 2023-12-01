@@ -1,4 +1,4 @@
-FROM docker.io/library/alpine:3.18.4 AS builder
+FROM docker.io/library/alpine:3.18.5 AS builder
 RUN apk add --no-cache 'crystal=1.8.2-r0' \
     shards \
     sqlite-static \
@@ -32,7 +32,7 @@ RUN if [ "$release" == 1 ] ; then \
         --link-flags "-lxml2 -llzma"; \
     fi
 
-FROM docker.io/library/alpine:3.18.4 AS release
+FROM docker.io/library/alpine:3.18.5 AS release
 RUN apk add --no-cache rsvg-convert ttf-opensans tini gc yaml libevent
 WORKDIR /invidious
 RUN addgroup -g 1000 -S invidious && \
