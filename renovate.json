@@ -1,24 +1,32 @@
 {
-  "platformAutomerge": true,
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
-    "helpers:pinGitHubActionDigests"
+    "config:recommended",
+    "config:best-practices",
+    ":automergeDigest",
+    ":semanticCommits",
+    ":automergeMinor",
+    ":enableVulnerabilityAlerts",
+    ":rebaseStalePrs"
   ],
+  "forkProcessing": "enabled",
   "packageRules": [
     {
-      "matchDatasources": [
-        "docker"
-      ]
+      "description": "Automerge updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
     }
   ],
-  "git-submodules": {
+  "lockFileMaintenance": {
     "enabled": true,
-    "versioning": "git",
-    "fileMatch": [
-      "(^|/)\\.gitmodules$"
-    ],
     "automerge": true
   },
-  "includeForks": true
+  "git-submodules": {
+    "enabled": true,
+    "automerge": true
+  },
+  "github-actions": {
+    "enabled": true,
+    "automerge": true
+  }
 }
