@@ -1,5 +1,5 @@
 FROM docker.io/library/alpine:3.19 AS builder
-RUN apk add --no-cache 'crystal-1.10.1-r0' \
+RUN apk add --no-cache 'crystal=1.10.1-r0' \
     shards \
     sqlite-static \
     yaml-static \
