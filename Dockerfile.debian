@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:12 AS builder
+FROM docker.io/library/debian:12@sha256:133a1f2aa9e55d1c93d0ae1aaa7b94fb141265d0ee3ea677175cdb96f5f990e5 AS builder
 RUN apt-get update
 RUN apt-get install curl git liblzma-dev libsqlite3-dev -y 
 RUN curl -fsSL https://crystal-lang.org/install.sh | bash -s -- --version=1.8
@@ -25,7 +25,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
     fi
 
 
-FROM docker.io/library/debian:12 AS release
+FROM docker.io/library/debian:12@sha256:133a1f2aa9e55d1c93d0ae1aaa7b94fb141265d0ee3ea677175cdb96f5f990e5 AS release
 RUN apt-get update && \
     apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 tini -y
 

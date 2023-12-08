@@ -1,4 +1,4 @@
-FROM docker.io/library/alpine:3.18.5 AS builder
+FROM docker.io/library/alpine:3.18.5@sha256:34871e7290500828b39e22294660bee86d966bc0017544e848dd9a255cdf59e0 AS builder
 RUN apk add --no-cache 'crystal=1.8.2-r0' \
     shards \
     sqlite-static \
@@ -34,7 +34,7 @@ RUN if [ "$release" == 1 ] ; then \
         --link-flags "-lxml2 -llzma"; \
     fi
 
-FROM gcr.io/distroless/static-debian12 AS release
+FROM gcr.io/distroless/static-debian12@sha256:0c3d36f317d6335831765546ece49b60ad35933250dc14f43f0fd1402450532e AS release
 # RUN apk add --no-cache librsvg ttf-opensans tini
 WORKDIR /invidious
 # RUN addgroup -g 1000 -S invidious && \
