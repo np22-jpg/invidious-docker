@@ -34,7 +34,7 @@ RUN if [ "$release" == 1 ] ; then \
         --link-flags "-lxml2 -llzma"; \
     fi
 
-FROM gcr.io/distroless/static-debian12@sha256:0d6ada5faececed5cd3f99baa08e4109934f2371c0d81b3bff38924fe1deea05 AS release
+FROM gcr.io/distroless/static-debian12@sha256:508313ed9307b1efb249cac49a0c07ab68192f9044b64ab33625c30dbe59c3f2 AS release
 # RUN apk add --no-cache librsvg ttf-opensans tini
 WORKDIR /invidious
 # RUN addgroup -g 1000 -S invidious && \
