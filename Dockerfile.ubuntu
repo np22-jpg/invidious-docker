@@ -1,4 +1,4 @@
-FROM docker.io/library/ubuntu:22.04@sha256:ca9449d4bae930d098f5d05aa33d0d279db957461b06b16928f65794ba8b3c80 AS builder
+FROM docker.io/library/ubuntu:22.04@sha256:adbb90115a21969d2fe6fa7f9af4253e16d45f8d4c1e930182610c4731962658 AS builder
 RUN apt-get update
 RUN apt-get install curl git liblzma-dev libsqlite3-dev -y 
 RUN curl -fsSL https://crystal-lang.org/install.sh | bash -s -- --version=1.8
@@ -25,7 +25,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
     fi
 
 
-FROM docker.io/library/ubuntu:22.04@sha256:ca9449d4bae930d098f5d05aa33d0d279db957461b06b16928f65794ba8b3c80 AS release
+FROM docker.io/library/ubuntu:22.04@sha256:adbb90115a21969d2fe6fa7f9af4253e16d45f8d4c1e930182610c4731962658 AS release
 RUN apt-get update && \
     apt-get install libxml2 librsvg2-bin libyaml-0-2 libsqlite3-0 openssl libevent-2.1-7 tini -y
 
