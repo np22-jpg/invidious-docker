@@ -1,4 +1,4 @@
-FROM docker.io/library/almalinux:8@sha256:2f6245ff2d8d8184d179d46f649149b9077fb02d2b338059251729df63109a1a AS builder
+FROM docker.io/library/almalinux:8@sha256:d7dbaf57916185b2be09e1eaa1156b543f3937164ffa08d7fdc020a0a3800a5a AS builder
 RUN dnf install dnf-plugins-core -y && \
     dnf config-manager --set-enabled powertools && \
     dnf install git-core xz-devel sqlite-libs libxml2-devel libyaml-devel sqlite-devel openssl-devel -y 
@@ -25,7 +25,7 @@ RUN if [[ "${release}" == 1 ]] ; then \
         --link-flags "-lxml2 -llzma"; \
     fi
 
-FROM docker.io/library/almalinux:8@sha256:2f6245ff2d8d8184d179d46f649149b9077fb02d2b338059251729df63109a1a AS release
+FROM docker.io/library/almalinux:8@sha256:d7dbaf57916185b2be09e1eaa1156b543f3937164ffa08d7fdc020a0a3800a5a AS release
 RUN dnf install epel-release -y && \
     dnf install libxml2 librsvg2 librsvg2-tools libyaml sqlite openssl libevent tini -y && \
     dnf clean all
