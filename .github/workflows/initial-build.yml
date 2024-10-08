@@ -83,7 +83,7 @@ jobs:
       # UPLOAD
 
       - name: Upload binaries
-        uses: actions/upload-artifact@604373da6381bf24206979c74d06a550515601b9 # v4
+        uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4
         with:
           name: initial-invidious-${{ matrix.patchsets }}-${{ matrix.crystalversions }}-${{ matrix.triple }}
           path: |
